@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
 const CustomErrorHandler = require("./middlewares/errors/customErrorHandler")
+
+//express body middleware
+app.use(express.json())
+
 //environment variables
 require("dotenv").config({
     path: "./config/env/.env"
@@ -10,6 +14,7 @@ const databaseConnect = require("./helpers/database/databaseConnect")
 databaseConnect().then(() => {
     console.log("mongo db connection success")
 });
+
 
 //Routes Middleware
 app.use("/api", routes)
