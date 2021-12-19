@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const CustomErrorHandler = require("./middlewares/errors/customErrorHandler")
+const CustomErrorHandler = require("./middlewares/error/customErrorHandler")
 
 //express body middleware
 app.use(express.json())

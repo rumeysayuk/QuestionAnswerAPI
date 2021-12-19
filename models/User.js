@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -9,14 +10,15 @@ const UserSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: [true, "Please try different email"],
+        unique: true,
         match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
     },
     password: {
         type: String,
         minlength: [6, "Please provide password with min length 6 "],
+        //validations sadece required gibi alanlarda geçerli.Uniquelerde olmuyor.
         required: ["true", "please provide a password"],
-        select: false,
+        select: false,   //bilgiler alınınca bunu gösterme
     },
     role: {
         type: String,
@@ -41,18 +43,23 @@ const UserSchema = new mongoose.Schema({
     }
 })
 UserSchema.methods.generateJwtFromUser = () => {
+    const {JWTSECRETKEY, JWTEXPIRE} = process.env
     const payload = {
         id: this._id,
         name: this.name
-
     }
+    const token = jwt.sign(payload, JWTSECRETKEY, {
+        expiresIn: JWTEXPIRE
+    })
+    return token
 }
-UserSchema.pre("save", function next() {
+UserSchema.pre("save", function (next) {
     //kaydedilmeye hazır data önce buraya gelir.  console.log(this)
     //parola değişme
     if (!this.isModified("password")) {
         next();
     }
+
     bcrypt.genSalt(10, (err, salt) => {
         if (err) next(err);
         bcrypt.hash(this.password, salt, (err, hash) => {

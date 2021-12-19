@@ -1,35 +1,47 @@
 const User = require("../models/User");
-const CustomError = require("../helpers/error/CustomError")
 const AsyncErrorWrapper = require("express-async-handler")
+const {tokenHelpers} = require("../helpers/authorization/tokenHelpers")
+const {validateUserInput} = require("../middlewares/input/inputHelpers")
+const CustomError = require("../helpers/error/CustomError");
 
 const register = AsyncErrorWrapper(async (req, res, next) => {
     const {name, email, password, role} = req.body;
-    try {
-        const user = await User.create({
-            name, email, password,role
-        })
-        res.status(200).json({
-            success: true,
-            data: user,
-            message: "register successfully"
-        })
-    } catch (err) {
-        return next(err);
-    }
 
+    const user = await User.create({
+        name, email, password, role
+    })
+    tokenHelpers(user, res)
+    const token = user.generateJwtFromUser();
+    console.log(token)
+    res.status(200).json({
+        success: true,
+        data: user,
+        message: "register successfully"
+    })
 })
+const login = AsyncErrorWrapper(async (req, res, next) => {
+    const {email, password} = req.body;
+    if (!validateUserInput(email, password)) {
+        return next(new CustomError("Please check your inputs!", 400))
+    }
+    const user=User.findOne({email})
+    res.status(200).json({
+        success: true
+    })
+});
 
-const login = () => {
-
+const getUser = (req, res, next) => {
+    res.json({
+        success: true,
+        data: {
+            id: req.user.id,
+            name: req.user.name
+        }
+    })
 }
-
-const errorTest = async (req, res, next) => {
-    return next(new TypeError("Type error"))
-}
-
 
 module.exports = {
     login,
     register,
-    errorTest
+    getUser
 }
