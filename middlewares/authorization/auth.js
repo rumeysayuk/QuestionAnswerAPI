@@ -1,8 +1,6 @@
 const CustomError = require("../../helpers/error/CustomError")
 const jwt = require("jsonwebtoken")
 const {isTokenIncluded, getAccessTokenFromHeader} = require("../../helpers/authorization/tokenHelpers")
-const {decode} = require("jsonwebtoken");
-
 
 const getAccessToRoute = (req, res, next) => {
     const {JWTSECRETKEY} = process.env

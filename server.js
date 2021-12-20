@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const CustomErrorHandler = require("./middlewares/error/customErrorHandler")
+const path = require("path")
 
 //express body middleware
 app.use(express.json())
@@ -14,7 +15,10 @@ const databaseConnect = require("./helpers/database/databaseConnect")
 databaseConnect().then(() => {
     console.log("mongo db connection success")
 });
-
+//static files
+app.use(express.static(path.join(__dirname, "public")))
+console.log(__dirname)
+// app.use()
 
 //Routes Middleware
 app.use("/api", routes)
