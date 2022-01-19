@@ -42,7 +42,7 @@ const UserSchema = new mongoose.Schema({
         default: false
     }
 })
-UserSchema.methods.generateJwtFromUser = () => {
+UserSchema.methods.generateJwtFromUser = function () {
     const {JWTSECRETKEY, JWTEXPIRE} = process.env
     const payload = {
         id: this._id,

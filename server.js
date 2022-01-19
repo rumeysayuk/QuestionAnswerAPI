@@ -2,10 +2,11 @@ const express = require("express");
 const app = express();
 const CustomErrorHandler = require("./middlewares/error/customErrorHandler")
 const path = require("path")
+const fileUpload =require("express-fileupload")
 
 //express body middleware
 app.use(express.json())
-
+app.use(fileUpload())
 //environment variables
 require("dotenv").config({
     path: "./config/env/.env"
@@ -22,6 +23,7 @@ console.log(__dirname)
 
 //Routes Middleware
 app.use("/api", routes)
+
 app.use(CustomErrorHandler)
 const PORT = process.env.PORT
 app.listen(PORT, () => {

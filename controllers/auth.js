@@ -3,6 +3,8 @@ const AsyncErrorWrapper = require("express-async-handler")
 const {tokenHelpers} = require("../helpers/authorization/tokenHelpers")
 const {validateUserInput, comparePassword} = require("../middlewares/input/inputHelpers")
 const CustomError = require("../helpers/error/CustomError");
+const path = require("path");
+const mongoose = require("mongoose")
 
 const register = AsyncErrorWrapper(async (req, res, next) => {
     const {name, email, password, role} = req.body;
@@ -38,6 +40,7 @@ const logout = AsyncErrorWrapper(async (req, res, next) => {
 })
 
 const getUser = (req, res, next) => {
+    console.log(req.body)
     res.json({
         success: true,
         data: {
@@ -46,10 +49,41 @@ const getUser = (req, res, next) => {
         }
     })
 }
+const uploadProfileImage = (req, res, next) => {
+    if (!req?.files?.profileImage) {
+        return res.status(400).json({
+            error: "Please choose file image!"
+        })
+    }
+    const extension = path.extname(req.files.profileImage.name);
+    const fileName = `${req?.user?.id}${extension}`
+
+    const folderPath = path.join(__dirname, "../", "public/uploads/images", fileName);
+    req.files.profileImage.mv(folderPath, async (err) => {
+        if (err) return next(new CustomError(err, 400));
+
+        await User.findOneAndUpdate({_id: req.user.id}, {profileImage: fileName})
+            .then((updatedUser) => {
+                console.log(updatedUser)
+                res.status(200).json({
+                    success: true,
+                    message: "Image successfully saved to database"
+                })
+            }).catch(() => {
+                return next(new CustomError("upload success but an error occurred while registering to the database.", 500))
+            })
+
+    })
+    res.status(200).json({
+        success: true,
+        message: "image upload successfully"
+    })
+}
 
 module.exports = {
     login,
     register,
     getUser,
-    logout
+    logout,
+    uploadProfileImage
 }
