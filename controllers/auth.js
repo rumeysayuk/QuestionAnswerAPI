@@ -1,10 +1,10 @@
 const User = require("../models/User");
 const AsyncErrorWrapper = require("express-async-handler")
 const {tokenHelpers} = require("../helpers/authorization/tokenHelpers")
-const {validateUserInput, comparePassword} = require("../middlewares/input/inputHelpers")
+const {validateUserInput, comparePassword} = require("../helpers/input/inputHelpers")
 const CustomError = require("../helpers/error/CustomError");
 const path = require("path");
-const mongoose = require("mongoose")
+const sendEmail=require("../helpers/libraries/sendEmail")
 
 const register = AsyncErrorWrapper(async (req, res, next) => {
     const {name, email, password, role} = req.body;
@@ -49,6 +49,7 @@ const getUser = (req, res, next) => {
         }
     })
 }
+
 const uploadProfileImage = (req, res, next) => {
     if (!req?.files?.profileImage) {
         return res.status(400).json({
@@ -80,10 +81,76 @@ const uploadProfileImage = (req, res, next) => {
     })
 }
 
+const forgotPassword=AsyncErrorWrapper(async(req,res,next)=>{
+  const resetEmail=req.body.email;
+  const user=await User.findOne({email:resetEmail})
+  if(!user){
+      return next(new CustomError("There is no user with that email",400))
+  }
+  const resetPasswordToken=user.getResetPasswordTokenFromUser();
+  await user.save();
+  const resetPasswordUrl=`http://localhost:5000/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
+
+  const emailTemplate=`
+  <h3>Reset your password</h3>
+  <p>This <a href='${resetPasswordUrl}' target='_blank'>Link</a> will be expire in 1 hour</p>
+  `;
+
+  try {
+      await sendEmail({
+          from:process.env.STMP_USER,
+          to:resetEmail,
+          subject:"Reset Your Password",
+          html:emailTemplate
+      });
+     return res.status(200).json({
+        success:true,
+        message:"Token sent to your email"
+    });
+  } catch (error) {
+      user.resetPasswordToken=undefined;
+      user.resetPasswordExpire=undefined;
+
+      await user.save();
+
+      return next(new CustomError("Email could not be send",500))
+  }
+
+})  
+
+const resetPassword=AsyncErrorWrapper(async(req,res,next)=>{
+    const {resetPasswordToken}=req.query;
+    const {password}=req.body;
+
+    if(!resetPasswordToken){
+      return next(new CustomError("Please provide a valid token",400))
+    } 
+    let user=await User.findOne({
+        resetPasswordToken:resetPasswordToken,
+        resetPasswordExpire:{$gt :Date.now()}
+    });
+    if(!user){
+        return next (new CustomError("Invalid token or session expired",404))
+    }
+    user.password=password;
+    user.resetPasswordToken=undefined;
+    user.resetPasswordExpire=undefined;
+
+    await user.save();
+
+
+ return res.status(200).json({
+     success:true,
+     message:"Reset Password Process Succesfully",
+ })
+})
+
 module.exports = {
     login,
     register,
     getUser,
     logout,
-    uploadProfileImage
+    uploadProfileImage,
+    forgotPassword,
+    resetPassword
 }
