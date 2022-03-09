@@ -18,7 +18,6 @@ databaseConnect().then(() => {
 });
 //static files
 app.use(express.static(path.join(__dirname, "public")))
-//console.log(__dirname)
 // app.use()
 
 //Routes Middleware
