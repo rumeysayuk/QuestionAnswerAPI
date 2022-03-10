@@ -137,15 +137,15 @@ const uploadMulterProfileImage = AsyncErrorWrapper(async (req, res) => {
 });
 
 const editDetails = AsyncErrorWrapper(async (req, res, next) => {
-   const editInfo =req.body
+   const editInfo = req.body
 
-   const user=await User.findByIdAndUpdate(req.user.id,editInfo,{
-      new:true,
-      runValidators:true
+   const user = await User.findByIdAndUpdate(req.user.id, editInfo, {
+      new: true,
+      runValidators: true
    })
    return res.status(200).json({
-      success:true,
-      data:user
+      success: true,
+      data: user
    })
 })
 
