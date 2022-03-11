@@ -7,23 +7,34 @@ const Question = require("./Question")
 const UserSchema = new mongoose.Schema({
    name: {
       type: String, required: [true, "Please provide a name!"]
-   }, email: {
+   },
+   email: {
       type: String,
       required: true,
       unique: true,
       match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
-   }, password: {
+   },
+   password: {
       type: String, minlength: [6, "Please provide password with min length 6 "], //validations sadece required gibi alanlarda geçerli.Uniquelerde olmuyor.
       required: ["true", "please provide a password"], select: false,   //bilgiler alınınca bunu gösterme
-   }, role: {
+   },
+   role: {
       type: String, default: "user", enum: ["user", "admin"]
-   }, createdAt: {
+   },
+   createdAt: {
       type: Date, default: Date.now()
-   }, title: {type: String}, about: {type: String}, place: {type: String}, website: {type: String}, profileImage: {
+   },
+   title: {type: String},
+   about: {type: String},
+   place: {type: String},
+   website: {type: String},
+   profileImage: {
       type: String, default: "default.jpg"
-   }, blocked: {
+   },
+   blocked: {
       type: Boolean, default: false
-   }, resetPasswordToken: {
+   },
+   resetPasswordToken: {
       type: String,
    }, resetPasswordExpire: {
       type: Date

@@ -45,8 +45,6 @@ const editQuestion = AsyncErrorWrapper(async (req, res, next) => {
       success: true,
       data: question
    })
-
-
 })
 
 const deleteQuestion = AsyncErrorWrapper(async (req, res, next) => {
