@@ -9,7 +9,7 @@ app.use(express.json())
 app.use(fileUpload())
 //environment variables
 require("dotenv").config({
-    path: "./config/env/.env"
+    path: ".env"
 });
 const routes = require("./routes")
 const databaseConnect = require("./helpers/database/databaseConnect")
