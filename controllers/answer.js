@@ -21,7 +21,10 @@ const addNewAnswerToQuestion = AsyncErrorWrapper(async (req, res, next) => {
 
 const getAllAnswersByQuestion = AsyncErrorWrapper(async (req, res, next) => {
    const {question_id} = req.params
-   const question = await Question.findById(question_id).populate("answers")
+   const question = await Question.findById(question_id).populate({
+      path:"answers",
+      select:"content"
+   })
    const answers = question.answers
 
    return res.status(200).json({
