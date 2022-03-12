@@ -11,12 +11,7 @@ const getSingleUser = AsyncErrorWrapper(async (req, res, next) => {
 })
 
 const getAllUsers = AsyncErrorWrapper(async (req, res, next) => {
-    const users = await User.find()
-
-    return res.status(200).json({
-        success: true,
-        data: users
-    })
+    return res.status(200).json(res.queryResults)
 })
 
 
